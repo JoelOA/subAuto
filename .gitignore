@@ -1,0 +1,61 @@
+# ---- Build output ----
+build/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# ---- Compiled binaries ----
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.dylib
+*.pdb
+*.ilk
+
+# ---- VS Code ----
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ---- Visual Studio (if you ever open it in VS instead) ----
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# ---- Third-party dependencies pulled in via FetchContent/submodules ----
+third_party/*
+!third_party/.gitkeep
+
+# ---- Downloaded models (whisper.cpp ggml models, ONNX Runtime models) ----
+*.bin
+*.onnx
+models/
+
+# ---- FFmpeg / ONNX Runtime prebuilt binaries if you vendor them locally ----
+ffmpeg/
+onnxruntime/
+
+# ---- Generated/test media files (don't commit video/audio test data) ----
+*.wav
+*.mp4
+*.mkv
+*.srt
+!samples/*.srt
+
+# ---- Logs ----
+*.log
+
+# ---- OS clutter ----
+Thumbs.db
+.DS_Store
