@@ -10,7 +10,7 @@ extern "C" {
 #include <libswresample/swresample.h>
 }
 
-
+// input variables
 AVFormatContext* format_context = nullptr;
 const AVCodec *codec = NULL;
 AVCodecContext *codec_context = nullptr;
@@ -36,9 +36,36 @@ int64_t first_pts = AV_NOPTS_VALUE;
 
 std::vector<float> accumulated_audio_data; // Vector to accumulate audio data
 
+
+// output variables 
+AVFormatContext* output_context = nullptr;
+const AVOutputFormat *output_fmt;
+
+// a wrapper around a single output AVStream
+typedef struct OutputStream {
+    AVStream *st;
+    AVCodecContext *enc;
+
+    // pts of the next frame that will be generated
+    int64_t next_pts;
+    int samples_count;
+
+    AVFrame *frame;
+    AVFrame *tmp_frame;
+
+    AVPacket *tmp_pkt;
+
+    float t, tincr, tincr2;
+
+    struct SwsContext *sws_ctx;
+    struct SwrContext *swr_ctx;
+} OutputStream;
+
+OutputStream audio_st = { 0 };
+
 int main() {
     // opening a stream to the media file to be processed
-    ret = avformat_open_input(&format_context, "url://to/media.file", NULL, NULL);
+    ret = avformat_open_input(&format_context, "C:\\Users\\Joel Osei-Asamoah\\Downloads\\Movies !\\A Separation-720P.mp4", NULL, NULL);
     if (ret < 0) {
         char error_buffer[AV_ERROR_MAX_STRING_SIZE];
         av_make_error_string(error_buffer, AV_ERROR_MAX_STRING_SIZE, ret);
@@ -195,5 +222,99 @@ int main() {
 
         av_packet_unref(packet);
     }
+
+    // // setting up an AVFormatContext for .wav
+    // ret = avformat_alloc_output_context2(&output_context, nullptr, nullptr, "output.wav");
+    // if (ret < 0) {
+    //     char error_buffer[AV_ERROR_MAX_STRING_SIZE];
+    //     av_make_error_string(error_buffer, AV_ERROR_MAX_STRING_SIZE, ret);
+    //     std::cerr << "Error during decoding: " << error_buffer << std::endl;
+    // }
+
+    // // get access to output format to set some parameters of our output stream.
+    // output_fmt = output_context->oformat;
+
+    // if (output_fmt->video_codec == AV_CODEC_ID_NONE &&
+    //     output_fmt->audio_codec != AV_CODEC_ID_NONE) {
+        
+    //     AVCodecContext *output_codec_context;
+    //     const AVCodec **output_codec;
+        
+    //     // Find encoder for audio stream
+    //     *output_codec = avcodec_find_encoder(output_fmt->audio_codec);
+    //     if (!(*output_codec)) {
+    //         std::cerr << "Could not find encoder for " << avcodec_get_name(output_fmt->audio_codec) << std::endl;
+    //     }
+
+    //     OutputStream *ost = &audio_st;
+
+
+    //     ost->tmp_pkt = av_packet_alloc();
+    //     if (!ost->tmp_pkt) {
+    //         std::cerr << "Could not allocate temporary packet" << std::endl;
+    //     }
+
+    //     ost->st = avformat_new_stream(output_context, nullptr);
+    //     if (!ost->st) {
+    //         std::cerr << "Could not allocate stream" << std::endl;
+    //     }
+
+    //     ost->st->id = output_context->nb_streams - 1;
+    //     output_codec_context = avcodec_alloc_context3(*output_codec);
+    //     if (!output_codec_context) {
+    //         std::cerr << "Could not allocate an encoding context" << std::endl;
+    //     }
+
+    //     ost->enc = output_codec_context;
+
+    //     if ((*output_codec)->type == AVMEDIA_TYPE_AUDIO) {
+    //         const void *codec_config;
+    //         output_codec_context->bit_rate = 64000;
+
+    //         /*
+    //         Figuring out what sample formats can be processed
+    //         by the selected encoder (they are more choosy than decoders
+    //         they do not accept anything)
+    //         */
+    //         ret = avcodec_get_supported_config(output_codec_context, nullptr, AV_CODEC_CONFIG_SAMPLE_FORMAT,
+    //                                            0, &codec_config, nullptr);
+    //         if (ret < 0) {
+    //             std::cerr << "Failed to get supported sample formats\n";
+    //         }
+
+    //         if (codec_config) {
+    //             output_codec_context->sample_fmt = *(const enum AVSampleFormat*) codec_config;
+    //         }
+    //         else {
+    //             output_codec_context->sample_fmt = AV_SAMPLE_FMT_FLTP;
+    //         }
+
+    //         ret = avcodec_get_supported_config(output_codec_context, nullptr, AV_CODEC_CONFIG_SAMPLE_RATE,
+    //                                            0, &codec_config, nullptr);
+    //         if (ret < 0) {
+    //             std::cerr << "Failed to get supported sample rates\n";
+    //         }
+
+    //         if (codec_config) {
+    //             const int *supported_samplerates = static_cast<const int *>(codec_config);
+    //             output_codec_context->sample_rate = supported_samplerates[0];
+    //             for (; *supported_samplerates; supported_samplerates++) {
+    //                 if (*supported_samplerates == 16000) {
+    //                     output_codec_context->sample_rate = 16000;
+    //                 }
+    //             }
+    //         }
+    //         else {
+    //             output_codec_context->sample_rate = 44100;
+    //         }
+
+
+    //     }
+
+        
+
+
+    // }
+
 
 }
